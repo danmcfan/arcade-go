@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	pong.Run()
+	pong.Run(50, 3, 5)
 }
