@@ -1,9 +1,9 @@
 package main
 
 import (
-	"game/internal"
+	"games/internal/pong"
 )
 
 func main() {
-	internal.Run()
+	pong.Run()
 }
