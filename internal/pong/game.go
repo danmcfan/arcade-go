@@ -27,8 +27,17 @@ type Ball struct {
 	x, y, speedX, speedY int
 }
 
+type Direction rune
+
+const (
+	None Direction = ' '
+	Up   Direction = 'U'
+	Down Direction = 'D'
+)
+
 type Player struct {
-	y, score int
+	y, score  int
+	direction Direction
 }
 
 type Game struct {
@@ -72,21 +81,13 @@ func gameLoop(game *Game, gameTick *time.Ticker, keyboardEvents <-chan termbox.E
 func handlePlayingInput(g *Game, ch rune) {
 	switch ch {
 	case 'w':
-		if g.playerOne.y > 0 {
-			g.playerOne.y--
-		}
+		g.playerOne.direction = Up
 	case 's':
-		if g.playerOne.y < height-g.paddleWidth {
-			g.playerOne.y++
-		}
+		g.playerOne.direction = Down
 	case 'i':
-		if g.playerTwo.y > 0 {
-			g.playerTwo.y--
-		}
+		g.playerTwo.direction = Up
 	case 'k':
-		if g.playerTwo.y < height-g.paddleWidth {
-			g.playerTwo.y++
-		}
+		g.playerTwo.direction = Down
 	}
 }
 
@@ -110,7 +111,7 @@ func newGame(scoreLimit, paddleWidth int) Game {
 }
 
 func newPlayer(paddleWidth int) Player {
-	return Player{y: centerY - paddleWidth/2, score: 0}
+	return Player{y: centerY - paddleWidth/2, direction: None, score: 0}
 }
 
 func newBall() Ball {
@@ -128,6 +129,28 @@ func newSpeed() int {
 }
 
 func (g *Game) update() {
+	if g.playerOne.direction == Up {
+		if g.playerOne.y > 0 {
+			g.playerOne.y--
+		}
+	}
+	if g.playerOne.direction == Down {
+		if g.playerOne.y < height-g.paddleWidth {
+			g.playerOne.y++
+		}
+	}
+
+	if g.playerTwo.direction == Up {
+		if g.playerTwo.y > 0 {
+			g.playerTwo.y--
+		}
+	}
+	if g.playerTwo.direction == Down {
+		if g.playerTwo.y < height-g.paddleWidth {
+			g.playerTwo.y++
+		}
+	}
+
 	if g.playerOne.score >= g.scoreLimit || g.playerTwo.score >= g.scoreLimit {
 		g.state = GameOver
 		return
