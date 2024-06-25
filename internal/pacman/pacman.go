@@ -1,7 +1,32 @@
 package pacman
 
-import "fmt"
+import (
+	"time"
+
+	"github.com/nsf/termbox-go"
+)
 
 func Run() {
-	fmt.Println("Not implemented")
+	err := termbox.Init()
+	if err != nil {
+		panic(err)
+	}
+	defer termbox.Close()
+
+	game := newGame()
+	gameTick := time.NewTicker(time.Duration(100) * time.Millisecond)
+	defer gameTick.Stop()
+	keyboardEvents := make(chan termbox.Event, 1)
+	exit := make(chan bool, 1)
+
+	go func() {
+		for {
+			keyboardEvents <- termbox.PollEvent()
+		}
+	}()
+
+	go gameLoop(&game, gameTick, keyboardEvents, exit)
+
+	<-exit
+	termbox.Close()
 }
