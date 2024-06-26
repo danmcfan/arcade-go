@@ -7,6 +7,10 @@ Terminal based classic arcade games in Go
 Run the following commands to start each game:
 
 ```
+go run ./cmd/pacman
+```
+
+```
 go run ./cmd/pong
 ```
 
@@ -16,6 +20,12 @@ go run ./cmd/snake
 
 
 ## Games
+
+### Pacman
+
+Use W, A, S, and D keys to move the pacman up, left, down, and right.
+
+![Pacman](/docs/pacman.png)
 
 ### Pong
 
