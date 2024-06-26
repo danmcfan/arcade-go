@@ -7,27 +7,32 @@ import (
 )
 
 const (
-	Width  = 28
-	Height = 31
+	LobbyXMin = 10
+	LobbyXMax = 17
+	LobbyYMin = 12
+	LobbyYMax = 16
+
+	GhostStartX = 14
+	GhostStartY = 11
+
+	WeakTicks = 50
 )
 
-type State byte
+type State int
 
 const (
 	GameOver State = 0
 	Playing  State = 1
 )
 
-type Maze [Height][Width]byte
-
-type Pixel byte
+type Pixel int
 
 const (
 	Open    Pixel = 0
 	Dot     Pixel = 1
 	PowerUp Pixel = 2
 
-	Pacman Pixel = 10
+	PlayerPixel Pixel = 10
 
 	RedGhost   Pixel = 20
 	PinkGhost  Pixel = 21
@@ -48,112 +53,124 @@ const (
 	Right Direction = 'd'
 )
 
-type Game struct {
-	state State
-	maze  Maze
-
-	x, y      int
-	direction Direction
+type Position struct {
+	x, y int
 }
 
-func gameLoop(game *Game, gameTick *time.Ticker, keyboardEvents <-chan termbox.Event, exit chan<- bool) {
+type Game struct {
+	maze Maze
+
+	state State
+	score int
+
+	player Player
+	ghosts Ghosts
+}
+
+func newGame() Game {
+	game := Game{
+		state:  Playing,
+		maze:   newMaze(),
+		player: newPlayer(),
+		ghosts: newGhosts(),
+	}
+	game.initMaze()
+	return game
+}
+
+func (g *Game) loop(gameTick *time.Ticker, keyboardEvents <-chan termbox.Event, exit chan<- bool) {
 	for {
 		select {
 		case ev := <-keyboardEvents:
 			if ev.Type == termbox.EventKey {
 				switch ev.Ch {
 				case 'w', 's', 'a', 'd', 'r':
-					handleInput(game, ev.Ch)
+					g.handleInput(ev.Ch)
 				case 'q':
 					exit <- true
 				}
 			}
 		case <-gameTick.C:
-			game.update()
-			draw(*game)
+			g.update()
+			draw(*g)
 		}
 	}
 }
 
-func handleInput(g *Game, ch rune) {
+func (g *Game) handleInput(ch rune) {
 	if ch == 'r' && g.state == GameOver {
 		*g = newGame()
 		return
 	}
-	g.direction = Direction(ch)
-}
 
-func newGame() Game {
-	initialMaze := Maze{
-		{100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100},
-		{100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100},
-		{100, 1, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 1, 100},
-		{100, 2, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 2, 100},
-		{100, 1, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 1, 100},
-		{100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100},
-		{100, 1, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 1, 100},
-		{100, 1, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 1, 100},
-		{100, 1, 1, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 1, 1, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 0, 100, 100, 0, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 0, 100, 100, 0, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 100, 100, 100, 101, 101, 100, 100, 100, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 100, 0, 0, 0, 0, 0, 0, 100, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 100, 0, 21, 0, 22, 0, 23, 100, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 100, 0, 0, 0, 0, 0, 0, 100, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 100, 100, 100, 100, 100, 100, 100, 100, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 100, 100, 100, 100, 100, 100, 100, 100, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 100, 100, 100, 100, 100, 1, 100, 100, 0, 100, 100, 100, 100, 100, 100, 100, 100, 0, 100, 100, 1, 100, 100, 100, 100, 100, 100},
-		{100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100},
-		{100, 1, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 1, 100},
-		{100, 1, 100, 100, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 1, 100, 100, 100, 100, 1, 100},
-		{100, 2, 1, 1, 100, 100, 1, 1, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 1, 100, 100, 1, 1, 2, 100},
-		{100, 100, 100, 1, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 1, 100, 100, 100},
-		{100, 100, 100, 1, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 1, 100, 100, 100},
-		{100, 1, 1, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 100, 100, 1, 1, 1, 1, 1, 1, 100},
-		{100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100},
-		{100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100, 100, 1, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 1, 100},
-		{100, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 100},
-		{100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100},
+	direction := Direction(ch)
+	nextPosition := g.player.nextPositionByDirection(direction)
+	pixel := g.pixelFromPosition(nextPosition)
+	if pixel == Wall || pixel == Gate {
+		return
 	}
 
-	return Game{
-		state:     Playing,
-		maze:      initialMaze,
-		x:         14,
-		y:         23,
-		direction: None,
+	g.player.direction = direction
+}
+
+func (g *Game) initMaze() {
+	g.maze.setPixel(g.player.position, PlayerPixel)
+	for pixel, ghost := range g.ghosts {
+		g.maze.setPixel(ghost.position, pixel)
 	}
 }
 
 func (g *Game) update() {
-	nextX, nextY := g.x, g.y
-
-	switch g.direction {
-	case Up:
-		nextY--
-	case Down:
-		nextY++
-	case Left:
-		nextX--
-	case Right:
-		nextX++
+	for pixel, ghost := range g.ghosts {
+		if ghost.weakTicks > 0 {
+			ghost.weakTicks--
+		}
+		g.ghosts[pixel] = ghost
 	}
 
-	nextPixel := Pixel(g.maze[nextY][nextX])
+	nextPosition := g.player.nextPosition()
+	nextPixel := g.pixelFromPosition(nextPosition)
 
-	if nextPixel == Wall || nextPixel == Gate {
+	switch nextPixel {
+	case Wall, Gate:
 		return
+	case RedGhost, PinkGhost, GreenGhost, GrayGhost:
+		ghost := g.ghosts[nextPixel]
+		if ghost.weakTicks > 0 {
+			g.score += 200
+			g.ghosts[nextPixel] = newGhost(ghost.positionDefault.x, ghost.positionDefault.y, ghost.positionDefault.x, ghost.positionDefault.y)
+
+		} else {
+			g.state = GameOver
+		}
+	case Dot:
+		g.score += 100
+	case PowerUp:
+		for pixel, ghost := range g.ghosts {
+			ghost.weakTicks = WeakTicks
+			g.ghosts[pixel] = ghost
+		}
 	}
 
-	if nextPixel == RedGhost || nextPixel == PinkGhost || nextPixel == GreenGhost || nextPixel == GrayGhost {
-		g.state = GameOver
+	g.updateMaze(PlayerPixel, g.player.position, nextPosition)
+	g.player.position = nextPosition
+
+	for pixel, ghost := range g.ghosts {
+		ghost.setDirection(g)
+		nextPosition := ghost.nextPosition()
+
+		g.updateMaze(pixel, ghost.position, nextPosition)
+		ghost.position = nextPosition
+
+		g.ghosts[pixel] = ghost
 	}
+}
 
-	g.maze[g.y][g.x] = byte(Open)
-	g.maze[nextY][nextX] = byte(Pacman)
+func (g *Game) pixelFromPosition(p Position) Pixel {
+	return Pixel(g.maze[p.y][p.x])
+}
 
-	g.x = nextX
-	g.y = nextY
+func (g *Game) updateMaze(p Pixel, cp Position, np Position) {
+	g.maze.setPixel(cp, Open)
+	g.maze.setPixel(np, p)
 }

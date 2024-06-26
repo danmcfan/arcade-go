@@ -1,16 +1,18 @@
 package pacman
 
 import (
+	"fmt"
+
 	"github.com/nsf/termbox-go"
 )
 
 func draw(g Game) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
-	if g.state == Playing {
-		drawPlaying(g)
-	} else {
+	if g.state == GameOver {
 		drawGameOver()
+	} else {
+		drawPlaying(g)
 	}
 
 	termbox.Flush()
@@ -26,22 +28,37 @@ func drawPlaying(g Game) {
 				setSymbol(x, y, ' ', '.', termbox.ColorWhite, termbox.ColorDarkGray)
 			case PowerUp:
 				setSymbol(x, y, ' ', '●', termbox.ColorWhite, termbox.ColorDarkGray)
-			case Pacman:
+			case PlayerPixel:
 				setPixel(x, y, termbox.ColorLightYellow)
-			case RedGhost:
-				setPixel(x, y, termbox.ColorLightRed)
-			case PinkGhost:
-				setPixel(x, y, termbox.ColorLightMagenta)
-			case GreenGhost:
-				setPixel(x, y, termbox.ColorLightGreen)
-			case GrayGhost:
-				setPixel(x, y, termbox.ColorLightGray)
+			case RedGhost, PinkGhost, GreenGhost, GrayGhost:
+				ghost := g.ghosts[Pixel(pixel)]
+				if ghost.weakTicks > 0 {
+					setPixel(x, y, termbox.ColorLightBlue)
+				} else {
+					var attribute termbox.Attribute
+					switch Pixel(pixel) {
+					case RedGhost:
+						attribute = termbox.ColorLightRed
+					case PinkGhost:
+						attribute = termbox.ColorLightMagenta
+					case GreenGhost:
+						attribute = termbox.ColorLightGreen
+					case GrayGhost:
+						attribute = termbox.ColorLightGray
+					}
+					setPixel(x, y, attribute)
+				}
 			case Wall:
 				setPixel(x, y, termbox.ColorBlue)
 			case Gate:
 				setSymbol(x, y, '=', '=', termbox.ColorLightGray, termbox.ColorDarkGray)
 			}
 		}
+	}
+
+	scoreStr := fmt.Sprintf("Score: %d", g.score)
+	for i, ch := range scoreStr {
+		termbox.SetCell(Width-len(scoreStr)/2+i, Height+1, ch, termbox.ColorYellow, termbox.ColorDefault)
 	}
 }
 

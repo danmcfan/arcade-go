@@ -14,7 +14,7 @@ func Run() {
 	defer termbox.Close()
 
 	game := newGame()
-	gameTick := time.NewTicker(time.Duration(100) * time.Millisecond)
+	gameTick := time.NewTicker(time.Duration(150) * time.Millisecond)
 	defer gameTick.Stop()
 	keyboardEvents := make(chan termbox.Event, 1)
 	exit := make(chan bool, 1)
@@ -25,7 +25,7 @@ func Run() {
 		}
 	}()
 
-	go gameLoop(&game, gameTick, keyboardEvents, exit)
+	go game.loop(gameTick, keyboardEvents, exit)
 
 	<-exit
 	termbox.Close()
