@@ -15,7 +15,8 @@ const (
 	GhostStartX = 14
 	GhostStartY = 11
 
-	WeakTicks = 50
+	LobbyTicks = 50
+	WeakTicks  = 50
 )
 
 type State int
@@ -122,6 +123,9 @@ func (g *Game) initMaze() {
 
 func (g *Game) update() {
 	for pixel, ghost := range g.ghosts {
+		if ghost.lobbyTicks > 0 {
+			ghost.lobbyTicks--
+		}
 		if ghost.weakTicks > 0 {
 			ghost.weakTicks--
 		}
@@ -138,7 +142,7 @@ func (g *Game) update() {
 		ghost := g.ghosts[nextPixel]
 		if ghost.weakTicks > 0 {
 			g.score += 200
-			g.ghosts[nextPixel] = newGhost(ghost.positionDefault.x, ghost.positionDefault.y, ghost.positionDefault.x, ghost.positionDefault.y)
+			g.ghosts[nextPixel] = newGhost(ghost.positionDefault.x, ghost.positionDefault.y, ghost.positionDefault.x, ghost.positionDefault.y, 0)
 
 		} else {
 			g.state = GameOver
@@ -152,14 +156,26 @@ func (g *Game) update() {
 		}
 	}
 
-	g.updateMaze(PlayerPixel, g.player.position, nextPosition)
+	g.updateMaze(Open, PlayerPixel, g.player.position, nextPosition)
 	g.player.position = nextPosition
 
 	for pixel, ghost := range g.ghosts {
 		ghost.setDirection(g)
 		nextPosition := ghost.nextPosition()
+		nextPixel := g.pixelFromPosition(nextPosition)
 
-		g.updateMaze(pixel, ghost.position, nextPosition)
+		switch nextPixel {
+		case Wall:
+			continue
+		case Gate:
+			if ghost.lobbyTicks > 0 {
+				continue
+			}
+		case RedGhost, PinkGhost, GreenGhost, GrayGhost:
+			nextPixel = Open
+		}
+
+		g.updateMaze(nextPixel, pixel, ghost.position, nextPosition)
 		ghost.position = nextPosition
 
 		g.ghosts[pixel] = ghost
@@ -170,7 +186,7 @@ func (g *Game) pixelFromPosition(p Position) Pixel {
 	return Pixel(g.maze[p.y][p.x])
 }
 
-func (g *Game) updateMaze(p Pixel, cp Position, np Position) {
-	g.maze.setPixel(cp, Open)
-	g.maze.setPixel(np, p)
+func (g *Game) updateMaze(cpi, npi Pixel, cpo, npo Position) {
+	g.maze.setPixel(cpo, cpi)
+	g.maze.setPixel(npo, npi)
 }
