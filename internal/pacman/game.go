@@ -48,16 +48,23 @@ type Game struct {
 	state State
 	score int
 
+	dotsEaten int
+	dotsTotal int
+
 	player Player
 	ghosts Ghosts
 }
 
 func newGame() Game {
+	maze := newMaze()
+
 	game := Game{
-		state:  Playing,
-		maze:   newMaze(),
-		player: newPlayer(),
-		ghosts: newGhosts(),
+		state:     Playing,
+		maze:      maze,
+		dotsEaten: 0,
+		dotsTotal: maze.dotsTotal(),
+		player:    newPlayer(),
+		ghosts:    newGhosts(),
 	}
 	return game
 }
@@ -75,7 +82,9 @@ func (g *Game) loop(gameTick *time.Ticker, keyboardEvents <-chan termbox.Event, 
 				}
 			}
 		case <-gameTick.C:
-			g.update()
+			if g.state == Playing {
+				g.update()
+			}
 			draw(*g)
 		}
 	}
@@ -98,6 +107,10 @@ func (g *Game) handleInput(ch rune) {
 }
 
 func (g *Game) update() {
+	if g.dotsEaten == g.dotsTotal {
+		g.state = GameOver
+	}
+
 	for _, ghost := range g.ghosts {
 		if ghost.weakTicks > 0 {
 			ghost.weakTicks--
@@ -132,7 +145,7 @@ func (g *Game) checkCollisions() {
 	for _, ghost := range g.ghosts {
 		if ghost.position == g.player.position {
 			if ghost.weakTicks > 0 {
-				g.score += 200
+				g.score += 400
 				ghost.reset()
 			} else {
 				g.state = GameOver
@@ -149,8 +162,12 @@ func (g *Game) movePlayer() {
 	case Wall, Gate:
 		return
 	case Dot:
+		g.dotsEaten++
 		g.score += 100
 	case PowerUp:
+		g.dotsEaten++
+		g.score += 200
+
 		for _, ghost := range g.ghosts {
 			ghost.weakTicks = WeakTicks
 		}

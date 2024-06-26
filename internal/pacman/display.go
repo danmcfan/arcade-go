@@ -10,7 +10,7 @@ func draw(g Game) {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 
 	if g.state == GameOver {
-		drawGameOver()
+		drawGameOver(g)
 	} else {
 		drawPlaying(g)
 	}
@@ -52,8 +52,9 @@ func drawPlaying(g Game) {
 	}
 }
 
-func drawGameOver() {
+func drawGameOver(g Game) {
 	gameOverStr := "Game over!"
+	scoreStr := fmt.Sprintf("Your score: %d", g.score)
 	restartStr := "Press 'R' to restart"
 	quitStr := "Press 'Q' to quit"
 
@@ -63,7 +64,9 @@ func drawGameOver() {
 	for i, ch := range gameOverStr {
 		termbox.SetCell(centerX-len(gameOverStr)/2+i, centerY-2, ch, termbox.ColorRed, termbox.ColorDefault)
 	}
-
+	for i, ch := range scoreStr {
+		termbox.SetCell(centerX-len(scoreStr)/2+i, centerY, ch, termbox.ColorYellow, termbox.ColorDefault)
+	}
 	for i, ch := range restartStr {
 		termbox.SetCell(centerX-len(restartStr)/2+i, centerY+2, ch, termbox.ColorWhite, termbox.ColorDefault)
 	}

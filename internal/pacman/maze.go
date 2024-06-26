@@ -43,6 +43,20 @@ func newMaze() Maze {
 	}
 }
 
+func (m *Maze) dotsTotal() int {
+	dotsTotal := 0
+
+	for _, row := range m {
+		for _, pixel := range row {
+			if Pixel(pixel) == Dot || Pixel(pixel) == PowerUp {
+				dotsTotal++
+			}
+		}
+	}
+
+	return dotsTotal
+}
+
 func (m *Maze) setPixel(po Position, pi Pixel) {
 	m[po.y][po.x] = int(pi)
 }
