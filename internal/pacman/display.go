@@ -28,31 +28,21 @@ func drawPlaying(g Game) {
 				setSymbol(x, y, ' ', '.', termbox.ColorWhite, termbox.ColorDarkGray)
 			case PowerUp:
 				setSymbol(x, y, ' ', '●', termbox.ColorWhite, termbox.ColorDarkGray)
-			case PlayerPixel:
-				setPixel(x, y, termbox.ColorLightYellow)
-			case RedGhost, PinkGhost, GreenGhost, GrayGhost:
-				ghost := g.ghosts[Pixel(pixel)]
-				if ghost.weakTicks > 0 {
-					setPixel(x, y, termbox.ColorLightBlue)
-				} else {
-					var attribute termbox.Attribute
-					switch Pixel(pixel) {
-					case RedGhost:
-						attribute = termbox.ColorLightRed
-					case PinkGhost:
-						attribute = termbox.ColorLightMagenta
-					case GreenGhost:
-						attribute = termbox.ColorLightGreen
-					case GrayGhost:
-						attribute = termbox.ColorLightGray
-					}
-					setPixel(x, y, attribute)
-				}
 			case Wall:
 				setPixel(x, y, termbox.ColorBlue)
 			case Gate:
 				setSymbol(x, y, '=', '=', termbox.ColorLightGray, termbox.ColorDarkGray)
 			}
+		}
+	}
+
+	setPixel(g.player.position.x, g.player.position.y, termbox.ColorLightYellow)
+	for c, g := range g.ghosts {
+		if g.weakTicks > 0 {
+			setPixel(g.position.x, g.position.y, termbox.ColorLightBlue)
+		} else {
+			setPixel(g.position.x, g.position.y, c)
+
 		}
 	}
 

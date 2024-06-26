@@ -33,7 +33,7 @@ func (p *Player) nextPosition() Position {
 			nextPosition.x = Width - 1
 		}
 		if nextPosition.x == Width {
-			nextPosition.y = 0
+			nextPosition.x = 0
 		}
 	}
 
@@ -59,7 +59,7 @@ func (p *Player) nextPositionByDirection(d Direction) Position {
 			nextPosition.x = Width - 1
 		}
 		if nextPosition.x == Width {
-			nextPosition.y = 0
+			nextPosition.x = 0
 		}
 	}
 
