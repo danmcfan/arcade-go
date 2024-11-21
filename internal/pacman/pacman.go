@@ -14,7 +14,7 @@ func Run() {
 	defer termbox.Close()
 
 	game := newGame()
-	gameTick := time.NewTicker(time.Duration(175) * time.Millisecond)
+	gameTick := time.NewTicker(time.Duration(200) * time.Millisecond)
 	defer gameTick.Stop()
 	keyboardEvents := make(chan termbox.Event, 1)
 	exit := make(chan bool, 1)
