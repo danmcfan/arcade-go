@@ -10,6 +10,13 @@ import (
 )
 
 const (
+	LargeScreen  = 1050
+	MediumScreen = 750
+
+	SmallCellSize  = 16
+	MediumCellSize = 24
+	LargeCellSize  = 32
+
 	GridWidth    = 20
 	GridHeight   = 20
 	TickInterval = 100.0
@@ -45,17 +52,47 @@ func main() {
 	fmt.Println("Starting a new game client...")
 
 	document := js.Global().Get("document")
+	window := js.Global().Get("window")
+
+	root := document.Call("getElementById", "root")
+
+	snakeButton := document.Call("getElementById", "snake")
+	pongButton := document.Call("getElementById", "pong")
+	pacmanButton := document.Call("getElementById", "pacman")
+
+	buttons := []js.Value{snakeButton, pongButton, pacmanButton}
+	selectedButton := "snake"
+
+	for _, button := range buttons {
+		button.Call("addEventListener", "click", js.FuncOf(func(this js.Value, args []js.Value) any {
+			id := this.Get("id").String()
+			if id == selectedButton {
+				return nil
+			}
+
+			for _, button := range buttons {
+				classList := button.Get("classList")
+				classList.Call("remove", "selected")
+			}
+
+			classList := this.Get("classList")
+			classList.Call("add", "selected")
+			selectedButton = id
+			return nil
+		}))
+	}
+
 	canvas := document.Call("getElementById", "canvas")
 	ctx := canvas.Call("getContext", "2d")
 
-	viewportWidth := document.Get("documentElement").Get("clientWidth").Float()
-	viewportHeight := document.Get("documentElement").Get("clientHeight").Float()
+	viewportWidth := window.Get("innerWidth").Float()
+	viewportHeight := window.Get("innerHeight").Float()
 
-	CellSize := 32
-	if viewportWidth <= 400 || viewportHeight <= 400 {
-		CellSize = 8
-	} else if viewportWidth <= 800 || viewportHeight <= 800 {
-		CellSize = 16
+	CellSize := LargeCellSize
+	if viewportWidth <= MediumScreen || viewportHeight <= MediumScreen {
+		CellSize = SmallCellSize
+	} else if viewportWidth <= LargeScreen || viewportHeight <= LargeScreen {
+		CellSize = MediumCellSize
 	}
 
 	Width := CellSize * GridWidth
@@ -64,7 +101,15 @@ func main() {
 	canvas.Set("width", Width)
 	canvas.Set("height", Height)
 
+	rootClassList := root.Get("classList")
+	rootClassList.Call("remove", "hidden")
+
 	game, lastUpdate := restartGame(CellSize, Width, Height)
+
+	window.Call("addEventListener", "resize", js.FuncOf(func(this js.Value, args []js.Value) any {
+		handleResize(window, canvas, &game)
+		return nil
+	}))
 
 	keyHandler := js.FuncOf(func(this js.Value, args []js.Value) any {
 		event := args[0]
@@ -176,6 +221,15 @@ func render(ctx js.Value, game internal.Game) {
 		}
 	}
 
+	if game.GameOver {
+		ctx.Set("fillStyle", "#fb2c36")
+		ctx.Set("font", "64px monospace")
+		ctx.Set("textAlign", "center")
+		ctx.Set("textBaseline", "middle")
+		ctx.Call("fillText", "GAME OVER", game.Width/2, game.Height/2)
+		return
+	}
+
 	ctx.Set("fillStyle", string(SnakeHead))
 	fillCell(ctx, game.Snake.Head().X, game.Snake.Head().Y, game.CellSize)
 
@@ -217,4 +271,26 @@ func setScore(score int, game *internal.Game) {
 	document := js.Global().Get("document")
 	scoreElement := document.Call("getElementById", "score")
 	scoreElement.Set("textContent", score)
+}
+
+func handleResize(window js.Value, canvas js.Value, game *internal.Game) {
+	viewportWidth := window.Get("innerWidth").Float()
+	viewportHeight := window.Get("innerHeight").Float()
+
+	CellSize := LargeCellSize
+	if viewportWidth <= MediumScreen || viewportHeight <= MediumScreen {
+		CellSize = SmallCellSize
+	} else if viewportWidth <= LargeScreen || viewportHeight <= LargeScreen {
+		CellSize = MediumCellSize
+	}
+
+	Width := CellSize * GridWidth
+	Height := CellSize * GridHeight
+
+	canvas.Set("width", Width)
+	canvas.Set("height", Height)
+
+	game.CellSize = CellSize
+	game.Width = Width
+	game.Height = Height
 }

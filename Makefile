@@ -1,6 +1,9 @@
 build-wasm:
 	GOOS=js GOARCH=wasm go build -o ./internal/assets/main.wasm ./cmd/client/main.go
 
+copy-assets:
+	cp -r ./internal/assets/* ./docs/
+
 build-server:
 	go build -o ./tmp/server ./cmd/server/main.go
 
