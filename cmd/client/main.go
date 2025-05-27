@@ -10,8 +10,11 @@ import (
 )
 
 const (
-	LargeScreen  = 1050
-	MediumScreen = 750
+	LargeScreenWidth  = 1500
+	LargeScreenHeight = 1100
+
+	MediumScreenWidth  = 1100
+	MediumScreenHeight = 800
 
 	SmallCellSize  = 16
 	MediumCellSize = 24
@@ -43,12 +46,11 @@ func main() {
 
 	snakeButton := document.Call("getElementById", "snake")
 	pongButton := document.Call("getElementById", "pong")
-	pacmanButton := document.Call("getElementById", "pacman")
 
 	scoreboard := document.Call("getElementById", "scoreboard")
 	instructions := document.Call("getElementById", "instructions")
 
-	buttons := []js.Value{snakeButton, pongButton, pacmanButton}
+	buttons := []js.Value{snakeButton, pongButton}
 
 	selectedGame := "snake"
 	gridWidth := 20
@@ -340,9 +342,9 @@ func handleResize(window js.Value, canvas js.Value, display *internal.Display) {
 	viewportHeight := window.Get("innerHeight").Float()
 
 	CellSize := LargeCellSize
-	if viewportWidth <= MediumScreen || viewportHeight <= MediumScreen {
+	if viewportWidth <= MediumScreenWidth || viewportHeight <= MediumScreenHeight {
 		CellSize = SmallCellSize
-	} else if viewportWidth <= LargeScreen || viewportHeight <= LargeScreen {
+	} else if viewportWidth <= LargeScreenWidth || viewportHeight <= LargeScreenHeight {
 		CellSize = MediumCellSize
 	}
 

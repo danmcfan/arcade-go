@@ -11,7 +11,3 @@ A classic arcade game where you control a snake that grows longer as it eats app
 ## Pong
 
 One of the earliest arcade games, Pong is a simple two-player tennis-style game. Players control paddles on opposite sides of the screen to hit a ball back and forth. The goal is to make your opponent miss the ball to score points.
-
-## Pacman
-
-An iconic maze game where you control Pacman, a yellow circular character, through a maze while eating dots and avoiding ghosts. The game features power pellets that allow Pacman to temporarily eat the ghosts for bonus points.

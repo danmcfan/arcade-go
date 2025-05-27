@@ -70,7 +70,7 @@ span {
     display: none !important;
 }
 
-@media (max-width: 1050px), (max-height: 1050px) {
+@media (max-width: 1500px), (max-height: 1100px) {
     .link {
         width: 128px;
         height: 48px;
@@ -86,7 +86,7 @@ span {
     }
 }
 
-@media (max-width: 750px), (max-height: 750px) {
+@media (max-width: 1100px), (max-height: 800px) {
     .link {
         width: 96px;
         height: 32px;
