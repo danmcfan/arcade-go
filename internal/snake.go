@@ -35,10 +35,7 @@ type Snake struct {
 	positions []Vec2
 }
 
-type Game struct {
-	CellSize         int
-	Width            int
-	Height           int
+type SnakeGame struct {
 	Snake            Snake
 	Apple            Vec2
 	Score            int
@@ -46,11 +43,8 @@ type Game struct {
 	GameOver         bool
 }
 
-func NewGame(cellSize, width, height int, snake Snake, apple Vec2) Game {
-	return Game{
-		CellSize:         cellSize,
-		Width:            width,
-		Height:           height,
+func NewSnakeGame(snake Snake, apple Vec2) SnakeGame {
+	return SnakeGame{
 		Snake:            snake,
 		Apple:            apple,
 		Score:            0,
@@ -99,6 +93,7 @@ func (s *Snake) CutTail() {
 }
 
 func NewApple(s Snake, minX, maxX, minY, maxY int) Vec2 {
+
 	apple := Vec2{
 		X: rand.Intn(maxX-minX) + minX,
 		Y: rand.Intn(maxY-minY) + minY,
