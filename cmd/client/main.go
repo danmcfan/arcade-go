@@ -55,7 +55,7 @@ func main() {
 	selectedGame := "snake"
 	gridWidth := 20
 	gridHeight := 20
-	tickInterval := 100.0
+	tickInterval := 50.0
 
 	canvas := document.Call("getElementById", "canvas")
 	ctx := canvas.Call("getContext", "2d")
@@ -127,7 +127,7 @@ func main() {
 			case "snake":
 				display.GridWidth = 20
 				display.GridHeight = 20
-				tickInterval = 100.0
+				tickInterval := 50.0
 
 				scoreboard.Set("innerHTML", "Score: <span id='score'>0</span>")
 				instructions.Set("innerHTML", "Use <span>W</span>, <span>A</span>, <span>S</span>, <span>D</span> or <span>Arrow Keys</span> to move<br/>Press <span>R</span> to restart")
