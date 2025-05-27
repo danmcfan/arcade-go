@@ -1,42 +1,17 @@
 # Arcade Go
 
-Terminal based classic arcade games in Go
+Navigate to `https://danmcfan.github.io/arcade-go/` to play the games.
 
-## Usage
+This project is built using Go and leverages WebAssembly (WASM) to run the games directly in your web browser. The Go code is compiled to WebAssembly, allowing it to communicate with the browser's JavaScript runtime. This enables seamless handling of user input and rendering of the games through the browser's canvas API, providing a smooth gaming experience without requiring any additional plugins or installations.
 
-Run the following commands to start each game:
+## Snake
 
-```
-go run ./cmd/pacman
-```
+A classic arcade game where you control a snake that grows longer as it eats apples. The challenge is to navigate the snake around the screen without hitting the walls or your own tail. The game gets progressively more difficult as the snake grows longer.
 
-```
-go run ./cmd/pong
-```
+## Pong
 
-```
-go run ./cmd/snake
-```
+One of the earliest arcade games, Pong is a simple two-player tennis-style game. Players control paddles on opposite sides of the screen to hit a ball back and forth. The goal is to make your opponent miss the ball to score points.
 
+## Pacman
 
-## Games
-
-### Pacman
-
-Use W, A, S, and D keys to move the pacman up, left, down, and right.
-
-![Pacman](/docs/pacman.png)
-
-### Pong
-
-Use W and S keys to move player one paddle up and down.
-
-Use I and K keys to move player two paddle up and down.
-
-![Pong](/docs/pong.png)
-
-### Snake
-
-Use W, A, S, and D keys to move the snake up, left, down, and right.
-
-![Snake](/docs/snake.png)
+An iconic maze game where you control Pacman, a yellow circular character, through a maze while eating dots and avoiding ghosts. The game features power pellets that allow Pacman to temporarily eat the ghosts for bonus points.
