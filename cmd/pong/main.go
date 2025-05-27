@@ -2,7 +2,8 @@ package main
 
 import (
 	"flag"
-	"games/internal/pong"
+
+	"github.com/danmcfan/arcade-go/internal/pong"
 )
 
 func main() {

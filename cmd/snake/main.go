@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"games/internal/snake"
+	"github.com/danmcfan/arcade-go/internal/snake"
 )
 
 func main() {

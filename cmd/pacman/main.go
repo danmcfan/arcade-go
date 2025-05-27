@@ -1,7 +1,7 @@
 package main
 
 import (
-	"games/internal/pacman"
+	"github.com/danmcfan/arcade-go/internal/pacman"
 )
 
 func main() {
