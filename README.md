@@ -1,6 +1,6 @@
 # Arcade Go
 
-Navigate to `https://danmcfan.github.io/arcade-go/` to play the games.
+Navigate to [https://danmcfan.github.io/arcade-go/](https://danmcfan.github.io/arcade-go/) to play the games.
 
 This project is built using Go and leverages WebAssembly (WASM) to run the games directly in your web browser. The Go code is compiled to WebAssembly, allowing it to communicate with the browser's JavaScript runtime. This enables seamless handling of user input and rendering of the games through the browser's canvas API, providing a smooth gaming experience without requiring any additional plugins or installations.
 
