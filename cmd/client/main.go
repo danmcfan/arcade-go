@@ -39,6 +39,13 @@ func handleKey(key string) internal.Signal {
 }
 
 func main() {
+	location := js.Global().Get("location")
+	hostname := location.Get("hostname").String()
+
+	if hostname == "localhost" {
+		go internal.RefreshOnDisconnect()
+	}
+
 	document := js.Global().Get("document")
 	window := js.Global().Get("window")
 

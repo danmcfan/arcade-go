@@ -10,12 +10,38 @@ import (
 	"time"
 
 	"github.com/danmcfan/arcade-go/internal"
+	"golang.org/x/net/websocket"
 )
 
 func main() {
+	websocketHandler := func(ws *websocket.Conn) {
+		fmt.Println("WebSocket connected...")
+
+		var message string
+		for {
+			err := websocket.Message.Receive(ws, &message)
+			if err != nil {
+				fmt.Printf("Error receiving message: %v\n", err)
+				return
+			}
+
+			fmt.Printf("Received message: %s\n", message)
+
+			err = websocket.Message.Send(ws, "pong")
+			if err != nil {
+				fmt.Printf("Error sending message: %v\n", err)
+				return
+			}
+		}
+	}
+
+	handler := http.NewServeMux()
+	handler.Handle("/", http.FileServer(http.FS(internal.AssetFiles())))
+	handler.Handle("/ws", websocket.Handler(websocketHandler))
+
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: http.FileServer(http.FS(internal.AssetFiles())),
+		Handler: handler,
 	}
 
 	// Channel to listen for errors coming from the listener.

@@ -12,7 +12,9 @@ serve:
 
 live-wasm:
 	air --build.cmd="make build-wasm" \
-		--build.bin=true
+		--build.bin=true \
+		--build.delay=100 \
+		--misc.clean_on_exit=true
 
 live-server:
 	air --build.cmd="make build-server" \
@@ -20,4 +22,5 @@ live-server:
 		--build.send_interrupt=true \
 		--build.include_ext=html,css,js,wasm,svg \
 		--build.include_dir="internal" \
+		--build.delay=100 \
 		--misc.clean_on_exit=true
