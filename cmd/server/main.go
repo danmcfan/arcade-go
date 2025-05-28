@@ -25,7 +25,7 @@ func main() {
 				return
 			}
 
-			fmt.Printf("Received message: %s\n", message)
+			time.Sleep(5 * time.Second)
 
 			err = websocket.Message.Send(ws, "pong")
 			if err != nil {

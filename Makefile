@@ -1,7 +1,8 @@
 build-wasm:
 	GOOS=js GOARCH=wasm go build -o ./internal/assets/main.wasm ./cmd/client/main.go
 
-copy-assets:
+build-assets:
+	make build-wasm
 	cp -r ./internal/assets/* ./docs/
 
 build-server:
@@ -24,3 +25,5 @@ live-server:
 		--build.include_dir="internal" \
 		--build.delay=100 \
 		--misc.clean_on_exit=true
+
+.PHONY: build-wasm copy-assets build-server serve live-wasm live-server
