@@ -1,24 +1,17 @@
-build-wasm:
+build/client:
 	GOOS=js GOARCH=wasm go build -o ./internal/assets/main.wasm ./cmd/client/main.go
 
-build-assets:
-	make build-wasm
-	cp -r ./internal/assets/* ./docs/
-
-build-server:
+build/server:
 	go build -o ./tmp/server ./cmd/server/main.go
 
-serve:
-	go run ./cmd/server/main.go
-
-live-wasm:
-	air --build.cmd="make build-wasm" \
+live/client:
+	air --build.cmd="make build/client" \
 		--build.bin=true \
 		--build.delay=100 \
 		--misc.clean_on_exit=true
 
-live-server:
-	air --build.cmd="make build-server" \
+live/server:
+	air --build.cmd="make build/server" \
 		--build.bin="./tmp/server" \
 		--build.send_interrupt=true \
 		--build.include_ext=html,css,js,wasm,svg \
@@ -26,4 +19,4 @@ live-server:
 		--build.delay=100 \
 		--misc.clean_on_exit=true
 
-.PHONY: build-wasm copy-assets build-server serve live-wasm live-server
+.PHONY: build/client build/server live/client live/server
