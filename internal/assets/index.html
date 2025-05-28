@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Arcade</title>
+        <link rel="icon" href="favicon.svg">
+        <link rel="stylesheet" href="index.css">
+        <script src="wasm_exec.js"></script>
+        <script>
+            const go = new Go();
+            WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+                go.run(result.instance);
+            });
+        </script>
+    </head>
+    <body>
+        <div id="root" class="hidden">
+            <nav>
+                <div id="snake" class="link selected">
+                    Snake
+                </div>
+                <div id="pong" class="link">
+                    Pong
+                </div>
+            </nav>
+            <main>
+                <p id="scoreboard">Score: <span id="score">0</span></p>
+                <canvas id="canvas"></canvas>
+                <p id="instructions">
+                    Use <span>W</span>, <span>A</span>, <span>S</span>, <span>D</span> or <span>Arrow Keys</span> to move
+                    <br/>
+                    Press <span>R</span> to restart
+                </p>
+            </main>
+        </div>
+    </body>
+</html>

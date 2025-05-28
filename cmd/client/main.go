@@ -3,6 +3,7 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"syscall/js"
 
@@ -39,6 +40,8 @@ func handleKey(key string) internal.Signal {
 }
 
 func main() {
+	log.Println("Starting client...")
+
 	location := js.Global().Get("location")
 	hostname := location.Get("hostname").String()
 
